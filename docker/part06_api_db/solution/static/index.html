@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Detection</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs@3" defer></script>
+</head>
+<body>
+
+    <script>
+    function languageApp() {
+        return {
+            inputText: '',
+            language: '',
+            feedbackSent: false,
+            attemptedDetection: false,
+
+            detectLanguage() {
+                console.log("Form submission prevented.");
+                fetch('predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `input_text=${encodeURIComponent(this.inputText)}`
+                })
+                .then(response => {
+                    console.log("Received response.");
+                    return response.json();
+                })
+                .then(data => {
+                    this.language = data.language;
+                    this.feedbackSent = false;
+                    this.attemptedDetection = true;
+                    console.log("Language detected:", this.language);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.attemptedDetection = true;
+                });
+            },
+
+            sendFeedback(correct) {
+                console.log("Sending feedback.");
+                fetch('feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: this.inputText,
+                        language: this.language,
+                        correct: correct
+                    })
+                })
+                .then(response => {
+                    console.log("Feedback response received.");
+                    return response.json();
+                })
+                .then(data => {
+                    this.feedbackSent = true;
+                    console.log("Feedback sent successfully.");
+                })
+                .catch(error => {
+                    console.error('Error sending feedback:', error);
+                });
+            }
+        };
+    }
+    </script>
+
+    <div class="container mt-4" x-data="languageApp()">
+        <form @submit.prevent="detectLanguage">
+            <div class="form-group">
+                <label for="text">Enter Text:</label>
+                <textarea class="form-control" id="text" x-model="inputText" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Detect Language</button>
+        </form>
+        <div class="mt-4">
+            <h3>Server Response:</h3>
+            <div style="background-color: #f8f9fa; border: 1px solid #ced4da; padding: 15px;">
+                <template x-if="language">
+                    <div>
+                        <h4 x-text="'Detected Language: ' + language"></h4>
+                        <button x-show="!feedbackSent" class="btn btn-success" @click="sendFeedback(true)">Correct</button>
+                        <button x-show="!feedbackSent" class="btn btn-danger" @click="sendFeedback(false)">Incorrect</button>
+                        <span x-show="feedbackSent">Thank you for your feedback!</span>
+                    </div>
+                </template>
+                <template x-if="!language && attemptedDetection">
+                    <p>No language detected, try again.</p>
+                </template>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

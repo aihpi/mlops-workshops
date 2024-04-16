@@ -1,0 +1,22 @@
+services:
+  api:
+    image: language-detection-api:solution-0.2
+    build:
+      context: .
+    environment:
+      ROOT_PATH: /user/${JUPYTERHUB_USER}/proxy/8200/
+    ports:
+      - "8200:8000" # Maps port 8200 on the host to port 8000 in the container
+
+  database:
+    image: postgres:16.2
+    environment:
+      POSTGRES_DB: aihpi
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345678
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d/
+
+volumes:
+  db_data:

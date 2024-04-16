@@ -1,0 +1,9 @@
+services:
+  api:
+    image: language-detection-api:solution-0.1
+    build:
+      context: .
+    environment:
+      - ROOT_PATH=/user/${JUPYTERHUB_USER}/proxy/8100/
+    ports:
+      - "8100:8000" # Maps port 8100 on the host to port 8000 in the container

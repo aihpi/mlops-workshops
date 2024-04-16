@@ -1,0 +1,36 @@
+services:
+  api:
+    image: language-detection-api:solution-0.3
+    build:
+      context: .
+    environment:
+      ROOT_PATH: /user/${JUPYTERHUB_USER}/proxy/8300/
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: 12345678
+      DB_NAME: aihpi
+    ports:
+      - "8300:8000" # Maps port 8300 on the host to port 8000 in the container
+    depends_on:
+      - database
+    networks:
+      - backend
+
+  database:
+    image: postgres:16.2
+    environment:
+      POSTGRES_DB: aihpi
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345678
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d/
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  db_data:
