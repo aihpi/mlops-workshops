@@ -1,0 +1,14 @@
+services:
+  api:
+    image: language-detection-api:0.2
+    build:
+      context: .
+    environment:
+      ROOT_PATH: /user/${JUPYTERHUB_USER}/proxy/8201/
+    ports:
+      - "8201:8000" # Maps port 8201 on the host to port 8000 in the container
+
+  # TODO: add database
+
+volumes:
+  db_data:

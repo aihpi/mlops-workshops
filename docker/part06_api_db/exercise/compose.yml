@@ -1,0 +1,24 @@
+# TODO: add network and dependency
+services:
+  api:
+    image: language-detection-api:0.3
+    build:
+      context: .
+    # TODO: add environment
+    environment:
+      ROOT_PATH: /user/${JUPYTERHUB_USER}/proxy/8301/
+    ports:
+      - "8301:8000" # Maps port 8301 on the host to port 8000 in the container
+
+  database:
+    image: postgres:16.2
+    environment:
+      POSTGRES_DB: aihpi
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345678
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d/
+
+volumes:
+  db_data:
